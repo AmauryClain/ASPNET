@@ -10,8 +10,8 @@
 		<td>@Html.DisplayFor(modelItem => student.Phone)</td>
 		<td>@Html.DisplayFor(modelItem => student.Subscribed)</td>
 		<td>
-			<a class="btn btn-primary" asp-controller="Students" asp-actions="Edit" asp-route-id="@student.Id">Edit</a>
-			<a class="btn btn-danger" asp-controller="Students" asp-actions="Delete" asp-route-id="@student.Id">Delete</a>
+			<a class="btn btn-primary" asp-controller="Students" asp-action="Edit" asp-route-id="@student.Id">Edit</a>
+			<a class="btn btn-danger" asp-controller="Students" asp-action="Delete" asp-route-id="@student.Id">Delete</a>
 		</td>
 	</tr>
 }

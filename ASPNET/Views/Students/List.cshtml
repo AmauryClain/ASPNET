@@ -4,10 +4,14 @@
 
 @foreach(var student in Model)
 {
-	<div class="mt-3">
-		<h3>@Html.DisplayFor(modelItem => student.Name)</h3>
-		<p>@Html.DisplayFor(modelItem => student.Email)</p>
-		<p>@Html.DisplayFor(modelItem => student.Phone)</p>
-		<p>@Html.DisplayFor(modelItem => student.Subscribed)</p>
-	</div>
+	<tr>
+		<td>@Html.DisplayFor(modelItem => student.Name)</td>
+		<td>@Html.DisplayFor(modelItem => student.Email)</td>
+		<td>@Html.DisplayFor(modelItem => student.Phone)</td>
+		<td>@Html.DisplayFor(modelItem => student.Subscribed)</td>
+		<td>
+			<a class="btn btn-primary" asp-controller="Students" asp-actions="Edit" asp-route-id="@student.Id">Edit</a>
+			<a class="btn btn-danger" asp-controller="Students" asp-actions="Delete" asp-route-id="@student.Id">Delete</a>
+		</td>
+	</tr>
 }

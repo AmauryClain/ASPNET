@@ -4,99 +4,115 @@ using Microsoft.EntityFrameworkCore;
 using ASPNET.Data;
 using ASPNET.Models.ViewModels;
 using ASPNET.Models.Entities;
+using ASPNET.Services;
 
 
 namespace ASPNET.Controllers
 {
     public class StudentsController : Controller
     {
-        private readonly ApplicationDbContext dbContext;
+        private readonly IStudentService _studentService;
 
-        public StudentsController(ApplicationDbContext dbContext)
+        public StudentsController(IStudentService studentService)
         {
-            this.dbContext = dbContext;
-        }
-
-        [HttpGet]
-        public IActionResult Add()
-        {
-            return View();
-        }
-
-        [HttpPost]
-
-        public async Task<IActionResult> Add(AddStudentViewModel addStudentViewModel)
-        {
-            var student = new Student
-            {
-                Name = addStudentViewModel.Name,
-                Email = addStudentViewModel.Email,
-                Phone = addStudentViewModel.Phone,
-                Subscribed = addStudentViewModel.Subscribed,
-            };
-
-            await dbContext.Students.AddAsync(student);
-
-            await dbContext.SaveChangesAsync();
-
-            return RedirectToAction("List", "Students");
+            _studentService = studentService;
         }
 
         [HttpGet]
         public async Task<IActionResult> List()
         {
-            var students = await dbContext.Students.ToListAsync();
+            var students = await _studentService.GetAllStudentsAsync();
+
+            return View(students);
+        }
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View("Login");
+        }
+
+        [HttpGet]
+
+        public async Task<IActionResult> GetStudentByIdAsync(Guid id)
+        {
+            var students = await _studentService.GetStudentByIdAsync(id);
+            if (students is null)
+            {
+                return NotFound(); // Return a 404 if the student is not found
+            }
 
             return View(students);
         }
 
         [HttpGet]
 
-        public async Task<IActionResult> Edit(Guid id)
+        public IActionResult Create()
         {
-            var student = await dbContext.Students.FindAsync(id);
+            return View("Add");
+        }
 
-            return View(student);
-		}
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Student studentViewModel)
+
+        public async Task<IActionResult> Create(Student student)
         {
-            var student = await dbContext.Students.FindAsync(studentViewModel.Id);
-
-            if(student is not null)
+            if (ModelState.IsValid)
             {
-                student.Name = studentViewModel.Name;
-                student.Email = studentViewModel.Email;
-                student.Phone = studentViewModel.Phone;
-                student.Subscribed = studentViewModel.Subscribed;
-
-                await dbContext.SaveChangesAsync();
+                await _studentService.CreateStudentAsync(student);
+                return RedirectToAction("List");
             }
+            return View(student);
+        }
 
-            return RedirectToAction("List", "Students");
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var student = await _studentService.GetStudentByIdAsync(id);
+            if(student == null)
+            {
+                return NotFound();
+            }
+            return View(student);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(Student student)
+        {
+            if(ModelState.IsValid)
+            {
+                await _studentService.UpdateStudentAsync(student);
+                return RedirectToAction("List");
+            }
+            return View(student);
         }
 
         [HttpGet]
-
-        public async Task<IActionResult> Delete(Guid id)
+        public async  Task<IActionResult> Delete(Guid id)
         {
-            var student = await dbContext.Students.FindAsync(id);
+            var student = await _studentService.GetStudentByIdAsync(id);
+            if (student == null)
+            {
+                return NotFound();
+            }
             return View(student);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(Student studentViewModel)
-        {
-            var student = await dbContext.Students.FindAsync(studentViewModel.Id);
-            
-            if (student is not null)
-            {
-                dbContext.Students.Remove(student);
-                await dbContext.SaveChangesAsync();
-            }
 
-            return RedirectToAction("List", "Students");
-        }
-    }
+		[HttpPost, ActionName("Delete")]
+		public async Task<IActionResult> DeleteConfirmed(Guid id)
+		{
+			try
+			{
+				await _studentService.DeleteStudentAsync(id);
+				return RedirectToAction("List");
+			}
+			catch (Exception)
+			{
+				return NotFound();
+			}
+		}
+
+	}
 }
